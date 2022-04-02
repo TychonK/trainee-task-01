@@ -36,6 +36,7 @@ const storage = [
 ]
 
 displayNotes();
+displayTable();
 
 // below event listener will add user input into the storage
 addBtn.addEventListener('click', function(){
@@ -82,7 +83,8 @@ addBtn.addEventListener('click', function(){
 	
 	addNote.value = '';
 	
-	displayNotes();
+    displayNotes();
+    displayTable();
 });
 
 
@@ -136,7 +138,8 @@ function displayNotes(){
 function deleteNote(index){
 	storage.splice(index, 1)
 	
-	displayNotes();
+    displayNotes();
+    displayTable();
 }
 
 //function to open edit modal
@@ -159,6 +162,7 @@ function openModal(id) {
     date.value = storage[id].dates.slice(0, 10)
     time.value = storage[id].dates.slice(-5)
 }
+
 
 //function to save the edit in the note
 function saveChangedNote(id) {
@@ -187,7 +191,9 @@ function saveChangedNote(id) {
 
     closeModal()
     displayNotes()
+    displayTable()
 }
+
 
 //function to close modal
 function closeModal() {
@@ -202,4 +208,70 @@ function closeModal() {
     date.value = ''
     time.value = ''
     modal.style.display = 'none'    
+}
+
+
+//function to display table
+function displayTable() {
+    const data = getTableData()
+    let html = `
+                    <tr>
+                        <th scope="row">Task</th>
+                        <td>${data.taskActive}</td>
+                        <td>${data.taskArchived}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Idea</th>
+                        <td>${data.ideaActive}</td>
+                        <td>${data.ideaArchived}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Random thought</th>
+                        <td>${data.thoughtActive}</td>
+                        <td>${data.thoughtArchived}</td>
+                    </tr>
+                `
+
+    const tableBody = document.querySelector('#table-body')
+    tableBody.innerHTML = html
+}
+
+//function to get table data
+function getTableData() {
+    const dataObj = {
+            taskActive: 0,
+            taskArchived: 0,
+            ideaActive: 0,
+            ideaArchived: 0,
+            thoughtActive: 0,
+            thoughtArchived: 0
+        }
+    
+    const tasks = storage.filter(note => note.category === 'task')
+    const ideas = storage.filter(note => note.category === 'idea')
+    const thoughts = storage.filter(note => note.category === 'random thought')
+
+    tasks.forEach(task => {
+        if (task.archived) {
+            dataObj.taskArchived++
+        } else {
+            dataObj.taskActive++
+        }
+    })
+    ideas.forEach(idea => {
+        if (idea.archived) {
+            dataObj.ideaArchived++
+        } else {
+            dataObj.ideaActive++
+        }
+    })
+    thoughts.forEach(thought => {
+        if (thought.archived) {
+            dataObj.thoughtArchived++
+        } else {
+            dataObj.thoughtActive++
+        }
+    })
+
+    return dataObj
 }
