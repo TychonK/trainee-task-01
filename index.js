@@ -79,9 +79,14 @@ addBtn.addEventListener('click', function(){
 	//pushing into storage
 	let tempObj = { text: addNote.value, time: dateTime, category: category.value, dates: appointment };
 	
-    storage.push(tempObj);
+    try {
+        storage.push(tempObj);
+    } catch (error) {
+        alert(error)
+    }
 	
-	addNote.value = '';
+    addNote.value = '';
+    category.value = 'null';
 	
     displayNotes();
     displayTable();
@@ -112,8 +117,9 @@ function displayNotes(){
 						<p class="card-text">${note.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
                         ${note.dates ? `<p class="card-subtitle mb-2 text-warning">DATE: ${note.dates}</p>` : ''}
                         <p class="card-text text-info">Category: ${note.category}</p>
-                        <button id="${index}" onclick=deleteNote(this.id) class="btn btn-danger">Delete</button>
                         <button id="${index}" onclick=openModal(this.id) class="btn btn-info">Edit</button>
+                        <button id="${index}" onclick=archiveNote(this.id) class="btn btn-success">Archive</button>
+                        <button id="${index}" onclick=deleteNote(this.id) class="btn btn-danger">Delete</button>
 					</div>
 				</div>
 			`;
@@ -122,15 +128,72 @@ function displayNotes(){
         }
 	});
 	
-	let noteEle = document.getElementById('notes');
+    let noteEle = document.getElementById('notes');
+    
+    const allActive = storage.filter(note => !note.archived)
 	
-	if(notesObj.length != 0){
+	if(allActive.length != 0){
 		noteEle.innerHTML = html;
 	}
 	else{
 		noteEle.innerHTML = '<h3 style="text-align: center; color: grey;">Nothing to display</h3>';
 	}
 	
+}
+
+
+// add event listener to the switch for showing the archived notes
+const switchArchived = document.querySelector('#flexSwitchCheckDefault')
+
+switchArchived.addEventListener('click', function (e) {
+    e.target.classList.toggle("show-archived")
+
+    const shouldShowArchived = [...e.target.classList].includes("show-archived")
+
+    shouldShowArchived ? displayArchived() : displayNotes()
+})
+
+//function to display archivede notes
+function displayArchived() {
+    let notesObj;
+    let notesString = storage;
+
+    if(notesString == null){
+		notesObj = [];
+	}
+	else{
+		notesObj = notesString;
+	}
+	
+	let html = '';
+	
+    notesObj.forEach(function (note, index) {  
+        if (note.archived) {
+            html += `
+				<div class="card mx-4 my-2 bg-secondary text-white thatsMyNote" style="width: 18rem;">
+					<div class="card-body">
+						<h6>${note.time}</h6>
+						<p class="card-text">${note.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
+                        ${note.dates ? `<p class="card-subtitle mb-2 text-warning">DATE: ${note.dates}</p>` : ''}
+                        <p class="card-text text-info">Category: ${note.category}</p>
+                        <button id="${index}" onclick=unarchiveNote(this.id) class="btn btn-success">Unarchive</button>
+					</div>
+				</div>
+			`;
+        } else {
+            return
+        }
+    });
+    let noteEle = document.getElementById('notes');
+	
+	const allArchived = storage.filter(note => note.archived)
+	
+	if(allArchived.length != 0){
+		noteEle.innerHTML = html;
+	}
+	else{
+		noteEle.innerHTML = '<h3 style="text-align: center; color: grey;">Nothing to display</h3>';
+	}
 }
 
 
@@ -142,7 +205,7 @@ function deleteNote(index){
     displayTable();
 }
 
-//function to open edit modal
+//function to open the edit modal
 function openModal(id) {
     const modal = document.getElementById('modal')
     const date = document.getElementById('modal-input-date')
@@ -274,4 +337,28 @@ function getTableData() {
     })
 
     return dataObj
+}
+
+//function to archive a note
+function archiveNote(id) {
+    try {
+        storage[id].archived = true
+    } catch (error) {
+        alert(error)
+    }
+
+    displayNotes();
+    displayTable();
+}
+
+//funciton to unarchive a note
+function unarchiveNote(id) {
+    try {
+        storage[id].archived = false
+    } catch (error) {
+        alert(error)
+    }
+
+    displayArchived();
+    displayTable();
 }
