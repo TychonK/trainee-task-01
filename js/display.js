@@ -15,7 +15,22 @@ export function displayNotes(){
 	let html = '';
 	
     notesObj.forEach(function (note, index) {
-        
+
+        const dateType = /(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}/g;
+
+        const isMatch = [...note.text.matchAll(dateType)]
+        const foundDates = isMatch.map(match => {
+            return match[0]
+        })
+
+        let dates = '';
+
+        if (foundDates.length > 0) {
+            foundDates.forEach(date => {
+                dates += date + ' | '
+            })
+        }
+
         if (!note.archived) {
             html += `
 				<div class="card mx-4 my-2 bg-dark text-white thatsMyNote" style="width: 18rem;">
@@ -23,6 +38,7 @@ export function displayNotes(){
 						<h6>${note.time}</h6>
 						<p class="card-text">${note.text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
                         ${note.dates ? `<p class="card-subtitle mb-2 text-warning">DATE: ${note.dates}</p>` : ''}
+                        ${dates.length > 0 ? `<p class="card-subtitle mb-2 text-danger">DATES: ${dates}<p/>` : ''}
                         <p class="card-text text-info">Category: ${note.category}</p>
                         <button id="${index}" onclick=openModal(this.id) class="btn btn-info">Edit</button>
                         <button id="${index}" onclick=archiveNote(this.id) class="btn btn-success">Archive</button>
@@ -109,8 +125,6 @@ export function displayTable() {
                     </tr>
                 `;
     })
-
-    console.log(html)
 
     const tableBody = document.querySelector('#table-body')
     tableBody.innerHTML = html
