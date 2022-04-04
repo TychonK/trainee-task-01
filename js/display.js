@@ -94,23 +94,23 @@ export function displayArchived() {
 //function to display table
 export function displayTable() {
     const data = getTableData()
-    let html = `
+
+    let html = '';
+
+    data.forEach(category => {
+
+        const key = Object.keys(category)
+
+        html += `
                     <tr>
-                        <th scope="row">Task</th>
-                        <td>${data.taskActive}</td>
-                        <td>${data.taskArchived}</td>
+                        <th scope="row">${key}</th>
+                        <td>${category[key].active}</td>
+                        <td>${category[key].archived}</td>
                     </tr>
-                    <tr>
-                        <th scope="row">Idea</th>
-                        <td>${data.ideaActive}</td>
-                        <td>${data.ideaArchived}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Random thought</th>
-                        <td>${data.thoughtActive}</td>
-                        <td>${data.thoughtArchived}</td>
-                    </tr>
-                `
+                `;
+    })
+
+    console.log(html)
 
     const tableBody = document.querySelector('#table-body')
     tableBody.innerHTML = html
@@ -118,40 +118,21 @@ export function displayTable() {
 
 //function to get table data
 function getTableData() {
-    const dataObj = {
-            taskActive: 0,
-            taskArchived: 0,
-            ideaActive: 0,
-            ideaArchived: 0,
-            thoughtActive: 0,
-            thoughtArchived: 0
-        }
-    
-    const tasks = storage.filter(note => note.category === 'task')
-    const ideas = storage.filter(note => note.category === 'idea')
-    const thoughts = storage.filter(note => note.category === 'random thought')
-
-    tasks.forEach(task => {
-        if (task.archived) {
-            dataObj.taskArchived++
-        } else {
-            dataObj.taskActive++
-        }
-    })
-    ideas.forEach(idea => {
-        if (idea.archived) {
-            dataObj.ideaArchived++
-        } else {
-            dataObj.ideaActive++
-        }
-    })
-    thoughts.forEach(thought => {
-        if (thought.archived) {
-            dataObj.thoughtArchived++
-        } else {
-            dataObj.thoughtActive++
-        }
+    const allCategories = storage.map(note => {
+        return note.category
     })
 
-    return dataObj
+    const uniqueCategories = Array.from(new Set(allCategories))
+
+    const filteredCategories = uniqueCategories.map(uniqueCategory => {
+        const obj = {
+            [uniqueCategory]: {
+                active: storage.filter(note => note.category === uniqueCategory && note.archived === false).length,
+                archived: storage.filter(note => note.category === uniqueCategory && note.archived === true).length
+            }
+        }
+        return obj
+    })
+
+    return filteredCategories
 }
