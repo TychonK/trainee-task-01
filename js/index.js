@@ -3,7 +3,7 @@ import { deleteNote, openModal, saveChangedNote, closeModal, archiveNote, unarch
 
 export const storage = [
     {
-        text: 'Lorem ipsum',
+        text: 'Lorem 06/01/2022 to 06/02/2022 ipsum',
         time: '2022-2-3 | 16:21',
         category: 'task',
         archived: false
